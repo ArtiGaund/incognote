@@ -33,21 +33,44 @@ const SignIn = () => {
 
 // we have already zod schema for signup
 const onSubmit = async (data: z.infer<typeof signInSchema>) => {
-    const result = await signIn('credentials', {
-        redirect: false,
-        identifier: data.identifier,
-        password: data.password
-    })
-    if(result?.error){
-        toast({
-            title: "Login failed",
-            description: "Incorrect username or password",
-            variant: "destructive"
+    try {
+        setIsSubmitting(true)
+        const result = await signIn('credentials', {
+            redirect: false,
+            identifier: data.identifier,
+            password: data.password
         })
+        if(result?.error){
+            if(result?.error === 'CredentialsSignin')
+                {
+                    toast({
+                        title: "Login failed",
+                        description: "Incorrect username or password",
+                        variant: "destructive"
+                    })
+                }else{
+                    toast({
+                        title: "Login failed",
+                        description: result.error,
+                        variant: "destructive"
+                    })
+                }
+            
+        }
+        if(result?.url){
+            toast({
+                title: "Login Successful",
+                description: "Moving towards dashboard page",
+
+            })
+            router.replace('/dashboard')
+        }
+    } catch (error) {
+        
+    } finally{
+        setIsSubmitting(false)
     }
-    if(result?.url){
-        router.replace('/dashboard')
-    }
+    
 }
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -98,10 +121,10 @@ const onSubmit = async (data: z.infer<typeof signInSchema>) => {
             </Form>
             <div className="text-center mt-4">
                 <p>
-                    Already a member?{' '}
-                    <Link href={"/sign-in"} className="text-blue-600 hover:text-blue-800" 
+                    Don't have account?{' '}Create one {' '}
+                    <Link href={"/sign-up"} className="text-blue-600 hover:text-blue-800" 
                     >
-                        Sign in
+                        Sign up
                     </Link>
                 </p>
             </div>
